@@ -800,9 +800,15 @@
 
         function syncToSheets(person) {
             const scriptUrl = BAKED_SCRIPT_URL;
-
             const data = loadData();
             const week = document.getElementById(person + 'Week').value;
+
+            let checkinData = {
+                person,
+                week: parseInt(week) || 0,
+                timestamp: new Date().toISOString(),
+                content: data
+            };
 
             const callbackName = 'handleResponse_' + Date.now();
             window[callbackName] = function(response) {
@@ -811,12 +817,7 @@
             };
 
             const script = document.createElement('script');
-            script.src = scriptUrl + '?callback=' + callbackName + '&data=' + encodeURIComponent(JSON.stringify({
-                person,
-                week: parseInt(week) || 0,
-                timestamp: new Date().toISOString(),
-                content: data
-            }));
+            script.src = scriptUrl + '?callback=' + callbackName + '&data=' + encodeURIComponent(JSON.stringify(checkinData));
             document.body.appendChild(script);
         }
 
