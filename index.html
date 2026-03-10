@@ -705,10 +705,9 @@
 
     <script>
         // ============ BAKED IN CONFIG ============
-        // Replace these with your actual values before uploading to GitHub
         const BAKED_SHEET_ID = '1jH6tPbR3uMRDHV8gdSJBKP2Eejt8zZ5_pPkVd0gqzzg';
-        const BAKED_SCRIPT_URL = 'PASTE_YOUR_DEPLOYMENT_URL_HERE';
-        const GITHUB_PAGES_URL = 'https://daetrc.github.io/c2c-dashboard/c2c-dashboard.html';
+        const BAKED_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbypys6EKWUTO3ZUgFIBcfclTr4vANSinOLJ-BXm6VUopsHDp58figvkwNstw_P4K4D5nA/exec';
+        const GITHUB_PAGES_URL = 'https://daetrc.github.io/c2c/c2c-dashboard.html';
 
         const APP_CONFIG = {
             version: '1.0.0',
@@ -801,10 +800,6 @@
 
         function syncToSheets(person) {
             const scriptUrl = BAKED_SCRIPT_URL;
-            if (scriptUrl === 'PASTE_YOUR_DEPLOYMENT_URL_HERE') {
-                alert('Google Apps Script URL not configured. Check your HTML setup.');
-                return;
-            }
 
             const data = loadData();
             const week = document.getElementById(person + 'Week').value;
@@ -891,10 +886,6 @@
 
         function syncTodosToSheets() {
             const scriptUrl = BAKED_SCRIPT_URL;
-            if (scriptUrl === 'PASTE_YOUR_DEPLOYMENT_URL_HERE') {
-                alert('Google Apps Script URL not configured. Check your HTML setup.');
-                return;
-            }
 
             const data = loadData();
             const callbackName = 'handleTodoResponse_' + Date.now();
