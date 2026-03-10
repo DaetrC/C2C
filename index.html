@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C2C | EOS Command Center</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-red: #e63946;
+            --dark-bg: #0f0f0f;
+            --white: #ffffff;
+            --light-gray: #f5f5f5;
+            --dark-text: #1a1a1a;
+            --border-color: #e0e0e0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--white);
+            color: var(--dark-text);
+            line-height: 1.6;
+        }
+
+        header {
+            background: var(--dark-bg);
+            color: var(--white);
+            padding: 20px 40px;
+            border-bottom: 4px solid var(--primary-red);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-logo h1 {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
+        .header-logo .tagline {
+            font-size: 12px;
+            color: var(--primary-red);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .header-right {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .sync-status {
+            font-size: 12px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sync-indicator {
+            width: 8px;
+            height: 8px;
+            background: #4caf50;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        nav {
+            background: var(--light-gray);
+            padding: 0 40px;
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            flex-wrap: wrap;
+        }
+
+        nav button {
+            background: none;
+            border: none;
+            padding: 15px 25px;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            color: var(--dark-text);
+        }
+
+        nav button:hover {
+            color: var(--primary-red);
+        }
+
+        nav button.active {
+            color: var(--primary-red);
+            border-bottom-color: var(--primary-red);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-header {
+            margin-bottom: 40px;
+            border-bottom: 2px solid var(--primary-red);
+            padding-bottom: 20px;
+        }
+
+        .section-header h2 {
+            font-size: 32px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .section-header p {
+            font-size: 14px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .checkin-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .checkin-card {
+            background: var(--light-gray);
+            border: 2px solid var(--border-color);
+            padding: 30px;
+            border-left: 4px solid var(--primary-red);
+            transition: all 0.3s ease;
+        }
+
+        .checkin-card:hover {
+            border-left-color: var(--dark-bg);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .checkin-card h3 {
+            font-size: 16px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            color: var(--dark-bg);
+        }
+
+        .checkin-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #999;
+            margin-bottom: 8px;
+        }
+
+        textarea, input[type="text"], input[type="email"], select {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        textarea:focus, input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-red);
+            box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .eos-metrics {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .metric-box {
+            background: var(--dark-bg);
+            color: var(--white);
+            padding: 25px;
+            text-align: center;
+            border-top: 4px solid var(--primary-red);
+        }
+
+        .metric-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--primary-red);
+            margin-bottom: 10px;
+        }
+
+        .metric-value {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: 2px solid var(--primary-red);
+            background: transparent;
+            color: var(--primary-red);
+            font-weight: 600;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            font-size: 12px;
+        }
+
+        .btn:hover {
+            background: var(--primary-red);
+            color: var(--white);
+        }
+
+        .btn-primary {
+            background: var(--primary-red);
+            color: var(--white);
+            border-color: var(--primary-red);
+        }
+
+        .btn-primary:hover {
+            background: var(--dark-bg);
+            border-color: var(--dark-bg);
+        }
+
+        .todo-container {
+            background: var(--light-gray);
+            border: 2px solid var(--border-color);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .todo-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .todo-input-group input {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            font-size: 14px;
+        }
+
+        .todo-input-group select {
+            width: 150px;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .todo-add-btn {
+            padding: 12px 25px;
+            background: var(--primary-red);
+            color: var(--white);
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .todo-add-btn:hover {
+            background: var(--dark-bg);
+        }
+
+        .todo-list {
+            list-style: none;
+        }
+
+        .todo-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+            gap: 12px;
+            transition: background 0.3s ease;
+        }
+
+        .todo-item:hover {
+            background: var(--white);
+        }
+
+        .todo-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .todo-item.completed label {
+            text-decoration: line-through;
+            color: #999;
+        }
+
+        .todo-item label {
+            flex: 1;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .todo-item .owner {
+            font-size: 12px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            min-width: 80px;
+        }
+
+        .todo-delete {
+            background: none;
+            border: none;
+            color: var(--primary-red);
+            cursor: pointer;
+            font-size: 16px;
+            transition: color 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .todo-delete:hover {
+            color: var(--dark-bg);
+        }
+
+        .framework-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+        }
+
+        .framework-card {
+            background: var(--light-gray);
+            border: 2px solid var(--border-color);
+            padding: 25px;
+            border-left: 4px solid var(--primary-red);
+        }
+
+        .framework-card h4 {
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--primary-red);
+            margin-bottom: 8px;
+        }
+
+        .framework-card p {
+            font-size: 13px;
+            line-height: 1.6;
+            color: #666;
+        }
+
+        .integration-status {
+            background: var(--light-gray);
+            border: 2px solid var(--border-color);
+            padding: 25px;
+            margin-top: 30px;
+            border-left: 4px solid var(--primary-red);
+        }
+
+        .integration-status h4 {
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            color: var(--dark-bg);
+        }
+
+        .status-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 13px;
+        }
+
+        .status-row:last-child {
+            border-bottom: none;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4caf50;
+        }
+
+        footer {
+            border-top: 1px solid var(--border-color);
+            padding: 20px 40px;
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+            margin-top: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .checkin-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .eos-metrics {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .framework-grid {
+                grid-template-columns: 1fr;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            nav {
+                padding: 0 20px;
+            }
+
+            nav button {
+                padding: 12px 15px;
+                font-size: 12px;
+            }
+
+            .todo-input-group {
+                flex-direction: column;
+            }
+
+            .todo-input-group input,
+            .todo-input-group select {
+                width: 100%;
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-logo">
+            <div>
+                <h1>C2C</h1>
+                <div class="tagline">Commissioned 2 Christ | EOS Command Center</div>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="sync-status">
+                <div class="sync-indicator"></div>
+                Connected
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav>
+        <button class="nav-btn active" data-section="dashboard">📊 Dashboard</button>
+        <button class="nav-btn" data-section="checkin">✓ Weekly Checkin</button>
+        <button class="nav-btn" data-section="todos">☐ Todo Tracker</button>
+        <button class="nav-btn" data-section="framework">♾️ Framework</button>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Dashboard Section -->
+        <section class="section active" id="dashboard">
+            <div class="section-header">
+                <h2>90-Day Dashboard</h2>
+                <p>Real-time EOS metrics & progress</p>
+            </div>
+
+            <div class="eos-metrics">
+                <div class="metric-box">
+                    <div class="metric-label">Days Elapsed</div>
+                    <div class="metric-value" id="daysElapsed">0</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-label">Checkins Completed</div>
+                    <div class="metric-value" id="checkinsCompleted">0</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-label">Todo Completion %</div>
+                    <div class="metric-value" id="todoCompletion">0%</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-label">Weeks Remaining</div>
+                    <div class="metric-value" id="weeksRemaining">13</div>
+                </div>
+            </div>
+
+            <div class="section-header">
+                <h2>Core Principles</h2>
+                <p>What we measure & what we prioritize</p>
+            </div>
+
+            <div class="framework-grid">
+                <div class="framework-card">
+                    <h4>🎯 Focus</h4>
+                    <p>Consistency over expansion. One eternal truth per week. Build rhythm before scale.</p>
+                </div>
+                <div class="framework-card">
+                    <h4>📊 Measurement</h4>
+                    <p>Spiritual fruit, not vanity metrics. Engagement depth, not viral reach. Real transformation.</p>
+                </div>
+                <div class="framework-card">
+                    <h4>🔗 Structure</h4>
+                    <p>Terence: Spiritual voice. Daetrius: Creative strategy. Clear lanes protect partnership.</p>
+                </div>
+                <div class="framework-card">
+                    <h4>⏱️ Timeline</h4>
+                    <p>Foundation first (90 days). Measure consistency. Expansion only after proof of durability.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Weekly Checkin Section -->
+        <section class="section" id="checkin">
+            <div class="section-header">
+                <h2>Weekly Checkin</h2>
+                <p>Sunday reflection & alignment</p>
+            </div>
+
+            <div class="checkin-grid">
+                <!-- Terence Checkin -->
+                <div class="checkin-card">
+                    <h3>Terence Checkin</h3>
+                    <div class="checkin-label">Week #</div>
+                    <input type="text" id="terenceWeek" placeholder="Enter week number">
+                    
+                    <div class="checkin-label">Spiritual Focus This Week</div>
+                    <textarea id="terenceFocus" placeholder="What eternal truth is guiding this week?"></textarea>
+                    
+                    <div class="checkin-label">Teaching Delivered</div>
+                    <textarea id="terenceTeaching" placeholder="Share notes from Thursday 7:33 study..."></textarea>
+                    
+                    <div class="checkin-label">Spiritual Fruit Observed</div>
+                    <textarea id="terenceFruit" placeholder="What transformation did you see in the audience?"></textarea>
+                    
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="saveCheckin('terence')">Save Checkin</button>
+                        <button class="btn" onclick="syncToSheets('terence')">Sync to Sheets</button>
+                    </div>
+                </div>
+
+                <!-- Daetrius Checkin -->
+                <div class="checkin-card">
+                    <h3>Daetrius Checkin</h3>
+                    <div class="checkin-label">Week #</div>
+                    <input type="text" id="daetriusWeek" placeholder="Enter week number">
+                    
+                    <div class="checkin-label">Creative Strategy This Week</div>
+                    <textarea id="daetriusStrategy" placeholder="Content structure, clips, messaging..."></textarea>
+                    
+                    <div class="checkin-label">Execution & Delivery</div>
+                    <textarea id="daetriusExecution" placeholder="What shipped? Clips, posts, visuals..."></textarea>
+                    
+                    <div class="checkin-label">Audience Engagement</div>
+                    <textarea id="daetriusEngagement" placeholder="Clarity metrics, response, reach..."></textarea>
+                    
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="saveCheckin('daetrius')">Save Checkin</button>
+                        <button class="btn" onclick="syncToSheets('daetrius')">Sync to Sheets</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Todo Section -->
+        <section class="section" id="todos">
+            <div class="section-header">
+                <h2>Todo Tracker</h2>
+                <p>EOS-style task management for both leaders</p>
+            </div>
+
+            <div class="todo-container">
+                <h3 style="margin-bottom: 20px; text-transform: uppercase; font-size: 16px;">Add New Task</h3>
+                <div class="todo-input-group">
+                    <input type="text" id="todoInput" placeholder="Task description...">
+                    <select id="todoOwner">
+                        <option value="Terence">Terence</option>
+                        <option value="Daetrius">Daetrius</option>
+                        <option value="Both">Both</option>
+                    </select>
+                    <button class="todo-add-btn" onclick="addTodo()">Add Task</button>
+                </div>
+
+                <h3 style="margin-bottom: 20px; text-transform: uppercase; font-size: 16px;">Active Tasks</h3>
+                <ul class="todo-list" id="todoList"></ul>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="syncTodosToSheets()">Sync All Todos to Sheets</button>
+            </div>
+        </section>
+
+        <!-- Framework Section -->
+        <section class="section" id="framework">
+            <div class="section-header">
+                <h2>Eternal Truth Framework</h2>
+                <p>The 6-step breakdown that powers C2C content</p>
+            </div>
+
+            <div class="framework-grid">
+                <div class="framework-card">
+                    <h4>1. Historical Context</h4>
+                    <p>Strip away the cultural and historical moment. What was happening when this was written?</p>
+                </div>
+                <div class="framework-card">
+                    <h4>2. Literary Context</h4>
+                    <p>Understand the genre and structure. Poetry, narrative, law, prophecy—context changes meaning.</p>
+                </div>
+                <div class="framework-card">
+                    <h4>3. Original Word Meaning</h4>
+                    <p>Etymology. What did this word actually mean in Greek, Hebrew, Aramaic? Precision matters.</p>
+                </div>
+                <div class="framework-card">
+                    <h4>4. Theological Anchor</h4>
+                    <p>What does the rest of scripture say about this concept? How does this fit the larger story?</p>
+                </div>
+                <div class="framework-card">
+                    <h4>5. Timeless/Eternal Principle</h4>
+                    <p>What remains true across all eras? Strip away language, culture, time—what's eternally true?</p>
+                </div>
+                <div class="framework-card">
+                    <h4>6. Modern Application</h4>
+                    <p>How does this change the way we live, think, love, act today? Practical transformation.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        Ministry first. Clarity over hype. Structure over emotion. Christ over platform.
+    </footer>
+
+    <script>
+        // ============ BAKED IN CONFIG ============
+        // Replace these with your actual values before uploading to GitHub
+        const BAKED_SHEET_ID = '1jH6tPbR3uMRDHV8gdSJBKP2Eejt8zZ5_pPkVd0gqzzg';
+        const BAKED_SCRIPT_URL = 'PASTE_YOUR_DEPLOYMENT_URL_HERE';
+        const GITHUB_PAGES_URL = 'https://daetrc.github.io/c2c-dashboard/c2c-dashboard.html';
+
+        const APP_CONFIG = {
+            version: '1.0.0',
+            startDate: new Date('2025-01-20'),
+            totalDays: 90
+        };
+
+        // ============ SETUP ============
+        function initializeApp() {
+            // Auto-fill sheet ID
+            document.getElementById('sheetId') = BAKED_SHEET_ID;
+            
+            // Check if script URL is baked in
+            if (BAKED_SCRIPT_URL !== 'PASTE_YOUR_DEPLOYMENT_URL_HERE') {
+                localStorage.setItem('c2cScriptUrl', BAKED_SCRIPT_URL);
+            }
+
+            updateMetrics();
+            renderTodos();
+        }
+
+        // ============ DATA MANAGEMENT ============
+        function loadData() {
+            const data = localStorage.getItem('c2cData');
+            return data ? JSON.parse(data) : {
+                checkins: [],
+                todos: [],
+                settings: {}
+            };
+        }
+
+        function saveData(data) {
+            localStorage.setItem('c2cData', JSON.stringify(data));
+        }
+
+        // ============ NAVIGATION ============
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const section = this.dataset.section;
+                
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                document.getElementById(section).classList.add('active');
+            });
+        });
+
+        // ============ METRICS ============
+        function updateMetrics() {
+            const now = new Date();
+            const daysElapsed = Math.floor((now - APP_CONFIG.startDate) / (1000 * 60 * 60 * 24));
+            const weeksRemaining = 13 - Math.floor(daysElapsed / 7);
+            
+            document.getElementById('daysElapsed').textContent = daysElapsed;
+            document.getElementById('weeksRemaining').textContent = Math.max(0, weeksRemaining);
+            
+            const data = loadData();
+            document.getElementById('checkinsCompleted').textContent = data.checkins.length;
+            
+            const todos = data.todos;
+            const completed = todos.filter(t => t.completed).length;
+            const percentage = todos.length > 0 ? Math.round((completed / todos.length) * 100) : 0;
+            document.getElementById('todoCompletion').textContent = percentage + '%';
+        }
+
+        // ============ CHECKINS ============
+        function saveCheckin(person) {
+            const week = document.getElementById(person + 'Week').value;
+            
+            let content = '';
+            if (person === 'terence') {
+                content = `Focus: ${document.getElementById('terenceFocus').value}\nTeaching: ${document.getElementById('terenceTeaching').value}\nFruit: ${document.getElementById('terenceFruit').value}`;
+            } else {
+                content = `Strategy: ${document.getElementById('daetriusStrategy').value}\nExecution: ${document.getElementById('daetriusExecution').value}\nEngagement: ${document.getElementById('daetriusEngagement').value}`;
+            }
+
+            const data = loadData();
+            data.checkins.push({
+                person,
+                week: parseInt(week) || 0,
+                date: new Date().toISOString(),
+                content
+            });
+            saveData(data);
+            
+            alert(`${person.charAt(0).toUpperCase() + person.slice(1)}'s checkin saved!`);
+            updateMetrics();
+        }
+
+        function syncToSheets(person) {
+            const scriptUrl = BAKED_SCRIPT_URL;
+            if (scriptUrl === 'PASTE_YOUR_DEPLOYMENT_URL_HERE') {
+                alert('Google Apps Script URL not configured. Check your HTML setup.');
+                return;
+            }
+
+            const data = loadData();
+            const week = document.getElementById(person + 'Week').value;
+
+            const callbackName = 'handleResponse_' + Date.now();
+            window[callbackName] = function(response) {
+                alert('✓ Synced to Google Sheets!');
+                delete window[callbackName];
+            };
+
+            const script = document.createElement('script');
+            script.src = scriptUrl + '?callback=' + callbackName + '&data=' + encodeURIComponent(JSON.stringify({
+                person,
+                week: parseInt(week) || 0,
+                timestamp: new Date().toISOString(),
+                content: data
+            }));
+            document.body.appendChild(script);
+        }
+
+        // ============ TODOS ============
+        function addTodo() {
+            const input = document.getElementById('todoInput').value;
+            const owner = document.getElementById('todoOwner').value;
+            
+            if (!input) {
+                alert('Enter a task');
+                return;
+            }
+
+            const data = loadData();
+            data.todos.push({
+                id: Date.now(),
+                text: input,
+                owner,
+                completed: false,
+                created: new Date().toISOString()
+            });
+            saveData(data);
+
+            document.getElementById('todoInput').value = '';
+            renderTodos();
+            updateMetrics();
+        }
+
+        function renderTodos() {
+            const data = loadData();
+            const list = document.getElementById('todoList');
+            
+            list.innerHTML = data.todos.map((todo, idx) => `
+                <li class="todo-item ${todo.completed ? 'completed' : ''}">
+                    <input type="checkbox" ${todo.completed ? 'checked' : ''} onchange="toggleTodo(${todo.id})">
+                    <label>${todo.text}</label>
+                    <div class="owner">${todo.owner}</div>
+                    <button class="todo-delete" onclick="deleteTodo(event)">×</button>
+                </li>
+            `).join('');
+        }
+
+        function toggleTodo(id) {
+            const data = loadData();
+            const todo = data.todos.find(t => t.id === id);
+            if (todo) {
+                todo.completed = !todo.completed;
+                saveData(data);
+                renderTodos();
+                updateMetrics();
+            }
+        }
+
+        function deleteTodo(event) {
+            const item = event.target.closest('.todo-item');
+            const text = item.querySelector('label').textContent;
+            
+            if (!confirm(`Delete "${text}"?`)) return;
+            
+            const data = loadData();
+            const idx = Array.from(document.querySelectorAll('.todo-item')).indexOf(item);
+            data.todos.splice(idx, 1);
+            saveData(data);
+            renderTodos();
+            updateMetrics();
+        }
+
+        function syncTodosToSheets() {
+            const scriptUrl = BAKED_SCRIPT_URL;
+            if (scriptUrl === 'PASTE_YOUR_DEPLOYMENT_URL_HERE') {
+                alert('Google Apps Script URL not configured. Check your HTML setup.');
+                return;
+            }
+
+            const data = loadData();
+            const callbackName = 'handleTodoResponse_' + Date.now();
+            
+            window[callbackName] = function(response) {
+                alert('✓ Todos synced to Google Sheets!');
+                delete window[callbackName];
+            };
+
+            const script = document.createElement('script');
+            script.src = scriptUrl + '?callback=' + callbackName + '&todos=' + encodeURIComponent(JSON.stringify(data.todos));
+            document.body.appendChild(script);
+        }
+
+        // ============ STARTUP ============
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+        });
+
+        // Update metrics every minute
+        setInterval(updateMetrics, 60000);
+    </script>
+</body>
+</html>
